@@ -19,7 +19,7 @@ public class UserService {
             throw new RuntimeException("Username is already taken");
         }
         if (userRepository.findByStudentNumber(user.getStudentNumber()).isPresent()) {
-            throw new RuntimeException("An account with this student number already exists);
+            throw new RuntimeException("An account with this student number already exists");
         }
         return userRepository.save(user);
     }
@@ -29,6 +29,6 @@ public class UserService {
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
             return userOpt.get();
         }
-        throw new RuntimeException("Invalid username or password);
+        throw new RuntimeException("Invalid username or password");
     }
 }
