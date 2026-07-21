@@ -14,23 +14,21 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // Register a new user (checking for duplicates first)
     public User registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("Username is already taken!");
+            throw new RuntimeException("Username is already taken");
         }
         if (userRepository.findByStudentNumber(user.getStudentNumber()).isPresent()) {
-        throw new RuntimeException("An account with this Student Number already exists!");
-    }
+            throw new RuntimeException("An account with this student number already exists);
+        }
         return userRepository.save(user);
     }
 
-    // Basic login verification (plain text for now to keep things simple for testing)
     public User loginUser(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
             return userOpt.get();
         }
-        throw new RuntimeException("Invalid username or password!");
+        throw new RuntimeException("Invalid username or password);
     }
 }

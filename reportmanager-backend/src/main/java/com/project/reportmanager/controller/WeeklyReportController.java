@@ -18,19 +18,18 @@ import com.project.reportmanager.service.WeeklyReportService;
 
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin(origins = "*") // Allows React to make API requests safely
+@CrossOrigin(origins = "*") 
 public class WeeklyReportController {
 
     @Autowired
     private WeeklyReportService weeklyReportService;
 
-    // Create or Update a report
+    
     @PostMapping
     public ResponseEntity<WeeklyReport> createOrUpdateReport(@RequestBody WeeklyReport report) {
         return ResponseEntity.ok(weeklyReportService.saveReport(report));
     }
 
-    // Get all reports for a specific student/user
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<WeeklyReport>> getReportsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(weeklyReportService.getReportsByUser(userId));
