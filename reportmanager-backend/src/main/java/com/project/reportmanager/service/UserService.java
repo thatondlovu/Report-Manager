@@ -31,4 +31,25 @@ public class UserService {
         }
         throw new RuntimeException("Invalid username or password");
     }
+    public User updateUser(Long id, User updatedDetails) {
+        User existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        
+        if (!existingUser.getUsername().equals(updatedDetails.getUsername()) &&
+        userRepository.existsByUsername(updatedDetails.getUsername())) {
+        throw new RuntimeException("Username is already taken!");
+        }
+        if (!existingUser.getStudentNumber().equals(updatedDetails.getStudentNumber()) &&
+            userRepository.existsByStudentNumber(updatedDetails.getStudentNumber())) {
+            throw new RuntimeException("Student number is already registered!");
+        }
+
+        existingUser.setUsername(updatedDetails.getUsername());
+        existingUser.setStudentNumber(updatedDetails.getStudentNumber());
+        existingUser.setDepartment(updatedDetails.getDepartment());
+
+        return userRepository.save(existingUser);
+    }
+            
+    
 }
