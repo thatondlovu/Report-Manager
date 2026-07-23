@@ -1,8 +1,11 @@
 package com.project.reportmanager.service;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.project.reportmanager.model.User;
@@ -14,6 +17,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username is already taken");
@@ -21,35 +27,46 @@ public class UserService {
         if (userRepository.findByStudentNumber(user.getStudentNumber()).isPresent()) {
             throw new RuntimeException("An account with this student number already exists");
         }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
-    public User loginUser(String username, String password) {
+    public User loginUser(String username, String rawPassword) {
         Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+
+        if (userOpt.isPresent() && passwordEncoder.matches(rawPassword, userOpt.get().getPassword())) {
             return userOpt.get();
         }
         throw new RuntimeException("Invalid username or password");
     }
-    public User updateUser(Long id, User updatedDetails) {
-        User existingUser = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        
-        if (!existingUser.getUsername().equals(updatedDetails.getUsername()) &&
-        userRepository.existsByUsername(updatedDetails.getUsername())) {
-        throw new RuntimeException("Username is already taken!");
+
+    public User updateUser(Long id, Map<String, String> payload) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+        if (payload.get("username") != null) {
+            user.setUsername(payload.get("username"));
         }
-        if (!existingUser.getStudentNumber().equals(updatedDetails.getStudentNumber()) &&
-            userRepository.existsByStudentNumber(updatedDetails.getStudentNumber())) {
-            throw new RuntimeException("Student number is already registered!");
+        if (payload.get("studentNumber") != null) {
+            user.setStudentNumber(payload.get("studentNumber"));
+        }
+        if (payload.get("department") != null) {
+            user.setDepartment(payload.get("department"));
         }
 
-        existingUser.setUsername(updatedDetails.getUsername());
-        existingUser.setStudentNumber(updatedDetails.getStudentNumber());
-        existingUser.setDepartment(updatedDetails.getDepartment());
+        String oldPassword = payload.get("oldPassword");
+        String newPassword = payload.get("newPassword");
 
-        return userRepository.save(existingUser);
-    }
+        if (oldPassword != null && newPassword != null && !newPassword.trim().isEmpty()) {
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+                throw new RuntimeException("Previous password is incorrect!");
+            }
             
-    
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        return userRepository.save(user);
+    }
 }
