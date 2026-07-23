@@ -1,4 +1,4 @@
-package com.project.reportmanager.model; // 1. This matches the new folder location!
+package com.project.reportmanager.model;
 
 import java.time.LocalDate;
 
