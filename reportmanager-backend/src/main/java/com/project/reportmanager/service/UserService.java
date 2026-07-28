@@ -20,9 +20,12 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(User user) {
+        validatePassword(user.getPassword());
+
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username is already taken");
         }
+
         if (userRepository.findByStudentNumber(user.getStudentNumber()).isPresent()) {
             throw new RuntimeException("An account with this student number already exists");
         }
@@ -48,9 +51,16 @@ public class UserService {
         if (payload.get("username") != null) {
             user.setUsername(payload.get("username"));
         }
-        if (payload.get("studentNumber") != null) {
-            user.setStudentNumber(payload.get("studentNumber"));
+
+        if (payload.get("studentNumber") != null && !payload.get("studentNumber").toString().trim().isEmpty()) {
+            try {
+                int studentNum = Integer.parseInt(payload.get("studentNumber").toString().trim());
+                user.setStudentNumber(studentNum);
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Student number must contain digits only!");
+            }
         }
+
         if (payload.get("department") != null) {
             user.setDepartment(payload.get("department"));
         }
@@ -62,10 +72,50 @@ public class UserService {
             if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
                 throw new RuntimeException("Previous password is incorrect!");
             }
-            
+
+            validatePassword(newPassword);
+
             user.setPassword(passwordEncoder.encode(newPassword));
         }
 
         return userRepository.save(user);
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            throw new RuntimeException("Password must be at least 8 characters long.");
+        }
+
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
+        boolean hasSymbol = false;
+
+        for (int i = 0; i < password.length(); i++) {
+            char ch = password.charAt(i);
+
+            if (Character.isUpperCase(ch)) {
+                hasUpper = true;
+            } else if (Character.isLowerCase(ch)) {
+                hasLower = true;
+            } else if (Character.isDigit(ch)) {
+                hasDigit = true;
+            } else {
+                hasSymbol = true;
+            }
+        }
+
+        if (!hasUpper) {
+            throw new RuntimeException("Password must contain at least one uppercase letter.");
+        }
+        if (!hasLower) {
+            throw new RuntimeException("Password must contain at least one lowercase letter.");
+        }
+        if (!hasDigit) {
+            throw new RuntimeException("Password must contain at least one number.");
+        }
+        if (!hasSymbol) {
+            throw new RuntimeException("Password must contain at least one special symbol (e.g., @, #, $, !).");
+        }
     }
 }

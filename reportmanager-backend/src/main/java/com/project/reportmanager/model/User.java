@@ -23,6 +23,6 @@ public class User {
     @Column(nullable = false, length = 255) 
     private String password;
 
-    private String studentNumber;
+    private int studentNumber;
     private String department;
 }
