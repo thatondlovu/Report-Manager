@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-
 const API_BASE_URL = 'http://localhost:8090/api';
 
-export const authService = {
+export const userService = {
     register: async (userData) => {
         const response = await axios.post(`${API_BASE_URL}/users/register`, userData);
         return response.data;
@@ -11,7 +10,15 @@ export const authService = {
     login: async (credentials) => {
         const response = await axios.post(`${API_BASE_URL}/users/login`, credentials);
         return response.data;
-    }
+    },
+    updateProfile: async (id, userData) => {
+        try {
+            const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData);
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response?.data || 'Failed to update your profile');
+        }
+    },
 };
 
 export const reportService = {
