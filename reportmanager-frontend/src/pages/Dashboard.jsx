@@ -63,7 +63,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
     }, 3000);
   };
 
-  // Listen for toast messages from page redirects (e.g. from ReportForm)
   useEffect(() => {
     if (location.state?.toastMessage) {
       showToast(location.state.toastMessage, location.state.toastType || 'success');
@@ -105,6 +104,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
   }, [user]);
 
   const [profileMsg, setProfileMsg] = useState('');
+
   const fetchReports = async () => {
     try {
       const data = await reportService.getReportsByUser(user.id);
@@ -145,7 +145,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
     e.preventDefault();
     setProfileMsg('');
 
-    // Student Number Validation
     const studentNumError = validateStudentNumber(profileData.studentNumber);
     if (studentNumError) {
       setProfileMsg(studentNumError);
@@ -218,7 +217,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
   };
 
   return (
-    <div className="dashboard-container" style={{ position: 'relative' }}>
+    <div className="dashboard-container">
       
       {}
       {toast.show && (
@@ -254,15 +253,16 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
               <button 
                 onClick={() => setIsEditingProfile(true)}
                 className="action-edit-btn"
-                style={{ marginTop: '0.75rem', width: '100%' }}
+                style={{ marginTop: '1rem', width: '100%' }}
               >
                 Edit Profile
               </button>
             </>
           ) : (
-            <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-              {profileMsg && <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{profileMsg}</span>}
+            <form onSubmit={handleSaveProfile} className="profile-edit-form">
+              {profileMsg && <div className="profile-error-banner">{profileMsg}</div>}
               
+              <div className="profile-section-divider">Details</div>
               <input
                 type="text"
                 name="username"
@@ -270,7 +270,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                 onChange={handleProfileChange}
                 placeholder="Username"
                 className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
                 required
               />
               <input
@@ -280,7 +279,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                 onChange={handleProfileChange}
                 placeholder="Student Number"
                 className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
                 required
               />
               <input
@@ -290,12 +288,13 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                 onChange={handleProfileChange}
                 placeholder="Department"
                 className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
                 required
               />
 
-              {}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div className="profile-section-divider">Change Password</div>
+
+              {/* Current Password */}
+              <div className="password-input-group">
                 <input
                   type={showOldPassword ? 'text' : 'password'}
                   name="oldPassword"
@@ -303,20 +302,19 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                   onChange={handleProfileChange}
                   placeholder="Current Password"
                   className="field-input"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowOldPassword(!showOldPassword)}
-                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                  className="password-toggle-btn"
                 >
                   {showOldPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
 
-              {}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {/* New Password */}
+              <div className="password-input-group">
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   name="newPassword"
@@ -324,20 +322,19 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                   onChange={handleProfileChange}
                   placeholder="Enter New Password"
                   className="field-input"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
                   autoComplete="new-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                  className="password-toggle-btn"
                 >
                   {showNewPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
 
-              {}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {/* Confirm New Password */}
+              <div className="password-input-group">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmNewPassword"
@@ -345,36 +342,34 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                   onChange={handleProfileChange}
                   placeholder="Confirm New Password"
                   className="field-input"
-                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
                   autoComplete="new-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                  className="password-toggle-btn"
                 >
                   {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
-                <button type="submit" className="primary-btn" style={{ fontSize: '0.75rem', padding: '0.3rem 0.5rem', flex: 1 }}>
+              <div className="profile-form-actions">
+                <button type="submit" className="btn-save-profile">
                   Save
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => setIsEditingProfile(false)} 
-                  className="action-btn edit"
-                  style={{ fontSize: '0.75rem', padding: '0.3rem 0.5rem' }}
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setProfileMsg('');
+                  }} 
+                  className="btn-cancel-profile"
                 >
                   Cancel
                 </button>
               </div>
             </form>
           )}
-        </div>
-
-        <nav className="sidebar-nav">
         </div>
 
         <nav className="sidebar-nav">
@@ -389,7 +384,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         <header className="dashboard-header">
           <div>
             <h1 className="page-title">Dashboard</h1>
-           
+            <p className="page-subtitle">Manage and track your weekly report submissions.</p>
           </div>
           <button onClick={() => navigate('/reports/new')} className="primary-btn">
             + Create Report
@@ -401,7 +396,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         ) : reports.length === 0 ? (
           <div className="empty-card">
             <h3>No reports submitted yet</h3>
-            <p>Get started by creating your first weekly log entry.</p>
+            <p>Click "+ Create Report" to log your first weekly entry.</p>
           </div>
         ) : (
           <div className="table-card">

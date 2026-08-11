@@ -17,7 +17,7 @@ body, html {
   box-sizing: border-box;
 }
 
-/* Fullscreen Layout like Dashboard */
+/* Fullscreen Layout*/
 .report-page-container {
   display: flex;
   min-height: 100vh;
@@ -262,7 +262,7 @@ body, html {
   margin-top: 1.5rem;
 }
 
-/* Action Buttons like dashboard buttons */
+/* Action Buttons */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -324,5 +324,4 @@ body, html {
 .btn-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
 }

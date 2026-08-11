@@ -199,9 +199,6 @@ const ReportForm = ({ user }) => {
       return;
     }
 
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -299,7 +296,6 @@ const ReportForm = ({ user }) => {
 
   return (
     <div className="report-page-container">
-      {}
       <aside className="report-sidebar">
         <div className="profile-card">
           <div className="profile-avatar">
@@ -321,7 +317,6 @@ const ReportForm = ({ user }) => {
         </nav>
       </aside>
 
-      {}
       <main className="report-main-content">
         <header className="report-header">
           <div>
@@ -440,9 +435,6 @@ const ReportForm = ({ user }) => {
           </form>
         </div>
       </main>
-    </div>
-        </div>
-      </form>
     </div>
   );
 };
