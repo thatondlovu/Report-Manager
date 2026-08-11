@@ -1,18 +1,87 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { reportService, userService } from '../services/api';
 import './Dashboard.css';
 
+const validatePasswordStrength = (password) => {
+  if (password.length < 8) {
+    return 'New password must be at least 8 characters long.';
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'New password must contain at least one uppercase letter.';
+  }
+  if (!/[a-z]/.test(password)) {
+    return 'New password must contain at least one lowercase letter.';
+  }
+  if (!/[0-9]/.test(password)) {
+    return 'New password must contain at least one number.';
+  }
+  return null;
+};
+
+const validateStudentNumber = (studentNumber) => {
+  if (!studentNumber) return 'Student Number is required.';
+  if (studentNumber.startsWith('0')) {
+    return 'Student Number cannot begin with 0.';
+  }
+  if (!/^\d+$/.test(studentNumber)) {
+    return 'Student Number must contain numbers only.';
+  }
+  if (studentNumber.length !== 9) {
+    return 'Student Number must be exactly 9 digits long.';
+  }
+  return null;
+};
+
+const EyeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+  </svg>
+);
+
 const Dashboard = ({ user, onLogout, onUserUpdate }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Toast state
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
+
+  // Listen for toast messages from page redirects (e.g. from ReportForm)
+  useEffect(() => {
+    if (location.state?.toastMessage) {
+      showToast(location.state.toastMessage, location.state.toastType || 'success');
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handleLogoutClick = () => {
     onLogout();
     navigate('/login');
   };
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [profileData, setProfileData] = useState({
     username: user?.username || '',
     studentNumber: user?.studentNumber || '',
@@ -21,6 +90,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
     newPassword: '',
     confirmNewPassword: '',
   });
+
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -33,6 +103,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
       });
     }
   }, [user]);
+
   const [profileMsg, setProfileMsg] = useState('');
 
   const fetchReports = async () => {
@@ -63,33 +134,55 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         const API_BASE_URL = 'http://localhost:8090/api';
         await fetch(`${API_BASE_URL}/reports/${id}`, { method: 'DELETE' });
         setReports(reports.filter((report) => report.id !== id));
+        
+        showToast('Report deleted successfully.', 'success');
       } catch (error) {
-        alert('Failed to delete report.');
+        showToast('Failed to delete report.', 'error');
       }
     }
   };
 
-const handleSaveProfile = async (e) => {
-    window.alert('Your profile has been updated')
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
     setProfileMsg('');
+
+    // Student Number Validation
+    const studentNumError = validateStudentNumber(profileData.studentNumber);
+    if (studentNumError) {
+      setProfileMsg(studentNumError);
+      return;
+    }
 
     const isAttemptingPasswordChange = 
       profileData.oldPassword || profileData.newPassword || profileData.confirmNewPassword;
 
     if (isAttemptingPasswordChange) {
       if (!profileData.oldPassword) {
-        setProfileMsg('Please confirm your previous password.');
+        setProfileMsg('Please enter your current password.');
         return;
       }
       if (!profileData.newPassword) {
         setProfileMsg('Please enter a new password.');
         return;
       }
+      
+      const passwordStrengthError = validatePasswordStrength(profileData.newPassword);
+      if (passwordStrengthError) {
+        setProfileMsg(passwordStrengthError);
+        return;
+      }
+
       if (profileData.newPassword !== profileData.confirmNewPassword) {
         setProfileMsg('New passwords do not match.');
         return;
       }
+
+      if (profileData.oldPassword === profileData.newPassword) {
+        setProfileMsg('New password cannot be the same as your current password.');
+        return;
+      }
     }
+
     const payload = {
       username: profileData.username,
       studentNumber: profileData.studentNumber,
@@ -103,31 +196,51 @@ const handleSaveProfile = async (e) => {
 
     try {
       const updatedUser = await userService.updateProfile(user.id, payload);
-      setProfileMsg('Profile updated!');
+      
+      showToast('Profile updated successfully!', 'success');
       
       if (onUserUpdate) {
         onUserUpdate(updatedUser);
       }
       
-      setTimeout(() => {
-        setIsEditingProfile(false);
-        setProfileMsg('');
-        setProfileData((prev) => ({
-          ...prev,
-          oldPassword: '',
-          newPassword: '',
-          confirmNewPassword: '',
-        }));
-      }, 3200);
+      setIsEditingProfile(false);
+      setProfileMsg('');
+      setProfileData((prev) => ({
+        ...prev,
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      }));
     } catch (err) {
-      setProfileMsg(err.response?.data || err.message || 'Failed to update profile');
+      const errorText = err.response?.data || err.message || 'Failed to update profile';
+      setProfileMsg(errorText);
+      showToast(errorText, 'error');
     }
   };
 
-
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ position: 'relative' }}>
+      
       {}
+      {toast.show && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          fontSize: '0.9rem',
+          fontWeight: '500',
+          zIndex: 9999,
+          transition: 'all 0.3s ease-in-out',
+        }}>
+          {toast.message}
+        </div>
+      )}
+
       <aside className="dashboard-sidebar">
         <div className="profile-card">
           <div className="profile-avatar">
@@ -137,18 +250,19 @@ const handleSaveProfile = async (e) => {
           {!isEditingProfile ? (
             <>
               <h3 className="profile-name">{user?.username}</h3>
+              <p className="profile-meta">{user?.studentNumber}</p>
+              <p className="profile-dept">{user?.department}</p>
               <button 
                 onClick={() => setIsEditingProfile(true)}
-                className="action-edit-btn edit"
-                style={{ marginTop: '0.75rem', width: '100%', }}
+                className="action-edit-btn"
+                style={{ marginTop: '0.75rem', width: '100%' }}
               >
                 Edit Profile
               </button>
-              
             </>
           ) : (
             <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-              {profileMsg && <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>{profileMsg} </span>}
+              {profileMsg && <span style={{ fontSize: '0.75rem', color: '#f87171' }}>{profileMsg}</span>}
               
               <input
                 type="text"
@@ -180,36 +294,69 @@ const handleSaveProfile = async (e) => {
                 style={{ fontSize: '0.8rem', padding: '0.4rem' }}
                 required
               />
-               <input
-                type="password"
-                name="oldPassword"
-                value={profileData.oldPassword}
-                onChange={handleProfileChange}
-                placeholder="Current Password"
-                className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
-                autoComplete="current-password"
-              />
-              <input
-                type="password"
-                name="newPassword"
-                value={profileData.newPassword}
-                onChange={handleProfileChange}
-                placeholder="Enter New Password"
-                className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
-                autoComplete="new-password"
-              />
-              <input
-                type="password"
-                name="confirmNewPassword"
-                value={profileData.confirmNewPassword}
-                onChange={handleProfileChange}
-                placeholder="Confirm New Password"
-                className="field-input"
-                style={{ fontSize: '0.8rem', padding: '0.4rem' }}
-                autoComplete="new-password"
-              />
+
+              {}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type={showOldPassword ? 'text' : 'password'}
+                  name="oldPassword"
+                  value={profileData.oldPassword}
+                  onChange={handleProfileChange}
+                  placeholder="Current Password"
+                  className="field-input"
+                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword(!showOldPassword)}
+                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                >
+                  {showOldPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+
+              {}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  name="newPassword"
+                  value={profileData.newPassword}
+                  onChange={handleProfileChange}
+                  placeholder="Enter New Password"
+                  className="field-input"
+                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                >
+                  {showNewPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+
+              {}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmNewPassword"
+                  value={profileData.confirmNewPassword}
+                  onChange={handleProfileChange}
+                  placeholder="Confirm New Password"
+                  className="field-input"
+                  style={{ fontSize: '0.8rem', padding: '0.4rem', width: '100%', paddingRight: '2.2rem' }}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', right: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.6 }}
+                >
+                  {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
 
               <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
                 <button type="submit" className="primary-btn" style={{ fontSize: '0.75rem', padding: '0.3rem 0.5rem', flex: 1 }}>
@@ -231,7 +378,7 @@ const handleSaveProfile = async (e) => {
         <nav className="sidebar-nav">
           <button className="sidebar-btn active">My Reports</button>
           <button onClick={handleLogoutClick} className="sidebar-btn logout">
-               Log Out
+            Log Out
           </button>
         </nav>
       </aside>
@@ -240,11 +387,11 @@ const handleSaveProfile = async (e) => {
         <header className="dashboard-header">
           <div>
             <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle"></p>
+           
           </div>
           <button onClick={() => navigate('/reports/new')} className="primary-btn">
             + Create Report
-        </button>
+          </button>
         </header>
 
         {loading ? (
@@ -252,6 +399,7 @@ const handleSaveProfile = async (e) => {
         ) : reports.length === 0 ? (
           <div className="empty-card">
             <h3>No reports submitted yet</h3>
+            <p>Click "+ Create Report" to log your first weekly entry.</p>
           </div>
         ) : (
           <div className="table-card">
@@ -267,7 +415,7 @@ const handleSaveProfile = async (e) => {
               <tbody>
                 {reports.map((report) => (
                   <tr key={report.id}>
-                    <td className="week-cell">{report.weekNumber}</td>
+                    <td className="week-cell">Week {report.weekNumber}</td>
                     <td>
                       {report.startDate} to {report.endDate}
                     </td>
@@ -283,11 +431,11 @@ const handleSaveProfile = async (e) => {
                     <td>
                       <div className="action-group">
                         <button
-                            onClick={() => navigate(`/reports/edit/${report.id}`)}
-                            className="action-btn edit"
-                          >
-                            Edit
-                      </button>
+                          onClick={() => navigate(`/reports/edit/${report.id}`)}
+                          className="action-btn edit"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={(e) => handleDelete(report.id, e)}
                           className="action-btn delete"
@@ -306,4 +454,5 @@ const handleSaveProfile = async (e) => {
     </div>
   );
 };
+
 export default Dashboard;

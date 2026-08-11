@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import ReportForm from './pages/ReportForm';
 
 function App() {
- 
   const [currentUser, setCurrentUser] = useState(() => {
     const savedUser = localStorage.getItem('currentUser');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -25,42 +24,62 @@ function App() {
     setCurrentUser(updatedUserData);
     localStorage.setItem('currentUser', JSON.stringify(updatedUserData)); 
   };
+
   return (
     <BrowserRouter>
       <Routes>
-        {}
-        <Route path="/login" 
+        {/* Login Route Protection */}
+        <Route 
+          path="/login" 
           element={
-            <Auth 
-              onLoginSuccess={handleLoginSuccess} 
-              onLogout={handleLogout} 
-              user={currentUser} 
-            />
+            currentUser ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Auth 
+                onLoginSuccess={handleLoginSuccess} 
+                onLogout={handleLogout} 
+                user={currentUser} 
+              />
+            )
           } 
         />
 
-        {}
-        <Route path="/dashboard" 
+        {/* Dashboard Protection*/}
+        <Route 
+          path="/dashboard" 
           element={
             currentUser ? (
               <Dashboard 
                 user={currentUser} 
                 onLogout={handleLogout} 
                 onUserUpdate={handleUserUpdate}
-        />) : ( <Navigate to="/login" replace />)}/>
+              />
+            ) : ( 
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
-        {}
-        <Route path="/reports/new" element={  currentUser ? (<ReportForm user={currentUser} />) : ( <Navigate to="/login" replace />)} />
+        {/*Create Report Protection*/}
+        <Route 
+          path="/reports/new" 
+          element={currentUser ? <ReportForm user={currentUser} /> : <Navigate to="/login" replace />} 
+        />
 
-        {}
-        <Route path="/reports/edit/:id" element={ currentUser ? (<ReportForm user={currentUser} />) : (<Navigate to="/login" replace />)} />
+        {/*Edit Report Protection*/}
+        <Route 
+          path="/reports/edit/:id" 
+          element={currentUser ? <ReportForm user={currentUser} /> : <Navigate to="/login" replace />} 
+        />
 
-        {}
-        <Route path="/"element={<Navigate to={currentUser ? "/dashboard" : "/login"} replace />} />
+        {/* Catch-All Fallback Route for Invalid URLs */}
+        <Route 
+          path="*" 
+          element={<Navigate to={currentUser ? "/dashboard" : "/login"} replace />} 
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-

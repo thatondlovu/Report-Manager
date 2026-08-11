@@ -15,30 +15,16 @@ const validatePassword = (password) => {
 
   for (let i = 0; i < password.length; i++) {
     const ch = password[i];
-
-    if (ch >= 'A' && ch <= 'Z') {
-      hasUpper = true;
-    } else if (ch >= 'a' && ch <= 'z') {
-      hasLower = true;
-    } else if (ch >= '0' && ch <= '9') {
-      hasDigit = true;
-    } else {
-      hasSymbol = true;
-    }
+    if (ch >= 'A' && ch <= 'Z') hasUpper = true;
+    else if (ch >= 'a' && ch <= 'z') hasLower = true;
+    else if (ch >= '0' && ch <= '9') hasDigit = true;
+    else hasSymbol = true;
   }
 
-  if (!hasUpper) {
-    return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
-  }
-  if (!hasLower) {
-    return { isValid: false, message: 'Password must contain at least one lowercase letter.' };
-  }
-  if (!hasDigit) {
-    return { isValid: false, message: 'Password must contain at least one number.' };
-  }
-  if (!hasSymbol) {
-    return { isValid: false, message: 'Password must contain at least one special symbol (e.g. @, #, $, !).' };
-  }
+  if (!hasUpper) return { isValid: false, message: 'Password must contain at least one uppercase letter.' };
+  if (!hasLower) return { isValid: false, message: 'Password must contain at least one lowercase letter.' };
+  if (!hasDigit) return { isValid: false, message: 'Password must contain at least one number.' };
+  if (!hasSymbol) return { isValid: false, message: 'Password must contain at least one special symbol (e.g. @, #, $, !).' };
 
   return { isValid: true, message: '' };
 };
@@ -119,114 +105,145 @@ const Auth = ({ onLoginSuccess }) => {
 
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <h2 className="auth-title">{isLogin ? 'Student Login' : 'Register Account'}</h2>
+      {/* Left Banner */}
+      <div className="auth-hero-panel">
+        <div className="hero-body">
+          <h1 className="hero-title">
+            
+            {isLogin ? 'Stay On Track!' : 'Start Your Journey!'}
+          </h1>
+          <p className="hero-description">
+            Looking for a simple way to stay on top of your weekly tasks? You've come to the right place!
+          </p>
+        </div>
+      </div>
 
-        {message.text && (
-          <div className={`auth-alert ${message.isError ? 'error' : 'success'}`}>
-            {message.text}
+      {/* Right Form Container */}
+      <div className="auth-form-panel">
+        <div className="form-content-wrapper">
+          <div className="brand-header-title">ReportHub</div>
+
+          <h2 className="auth-main-title">
+            {isLogin ? 'Welcome Back!' : 'Create Account'}
+          </h2>
+
+          <div className="auth-sub-link">
+            {isLogin ? (
+              <>
+                Don't have an account?{' '}
+                <button 
+                  type="button" 
+                  className="inline-toggle-btn" 
+                  onClick={() => { setIsLogin(false); setMessage({ text: '', isError: false }); }}
+                >
+                  Create a new account now
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button 
+                  type="button" 
+                  className="inline-toggle-btn" 
+                  onClick={() => { setIsLogin(true); setMessage({ text: '', isError: false }); }}
+                >
+                  Log in here
+                </button>
+              </>
+            )}
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="input-group">
-            <label className="input-label">Username</label>
+          {message.text && (
+            <div className={`auth-alert-box ${message.isError ? 'error' : 'success'}`}>
+              {message.text}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="auth-form">
             <input 
               type="text" 
               name="username" 
+              placeholder="Username"
               required 
               value={formData.username} 
               onChange={handleChange}
-              className="auth-input"
+              className="auth-input-styled"
             />
-          </div>
 
-          <div className="input-group">
-            <label className="input-label">Password</label>
-            <div className="password-wrapper">
+            {!isLogin && (
+              <>
+                <input 
+                  type="text" 
+                  name="studentNumber" 
+                  placeholder="Student Number"
+                  required 
+                  value={formData.studentNumber} 
+                  onChange={handleChange}
+                  className="auth-input-styled"
+                />
+
+                <input 
+                  type="text" 
+                  name="department" 
+                  placeholder="Department"
+                  required 
+                  value={formData.department} 
+                  onChange={handleChange}
+                  className="auth-input-styled"
+                />
+              </>
+            )}
+
+            <div className="input-field-wrapper">
               <input 
                 type={showPassword ? 'text' : 'password'} 
                 name="password" 
+                placeholder="Password"
                 required 
                 value={formData.password} 
                 onChange={handleChange}
-                className="auth-input"
-                placeholder="••••••••"
+                className="auth-input-styled"
+                style={{ paddingRight: '2.5rem' }}
               />
               <button 
                 type="button" 
-                className="toggle-password-btn"
+                className="toggle-pwd-icon"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
-          </div>
 
-          {!isLogin && (
-            <>
-              <div className="input-group">
-                <label className="input-label">Confirm Password</label>
-                <div className="password-wrapper">
-                  <input 
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    name="confirmPassword" 
-                    required 
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="auth-input"
-                    placeholder="••••••••"
-                  />
-                  <button 
-                    type="button" 
-                    className="toggle-password-btn"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="input-group">
-                <label className="input-label">Student Number</label>
+            {!isLogin && (
+              <div className="input-field-wrapper">
                 <input 
-                  type="text" 
-                  name="studentNumber" 
+                  type={showConfirmPassword ? 'text' : 'password'} 
+                  name="confirmPassword" 
+                  placeholder="Confirm Password"
                   required 
-                  value={formData.studentNumber} 
+                  value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="auth-input"
+                  className="auth-input-styled"
+                  style={{ paddingRight: '2.5rem' }}
                 />
+                <button 
+                  type="button" 
+                  className="toggle-pwd-icon"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
               </div>
+            )}
 
-              <div className="input-group">
-                <label className="input-label">Department</label>
-                <input 
-                  type="text" 
-                  name="department" 
-                  required 
-                  value={formData.department} 
-                  onChange={handleChange}
-                  className="auth-input"
-                />
-              </div>
-            </>
-          )}
+            <button type="submit" disabled={loading} className="btn-primary-dark">
+              {loading ? 'Processing...' : isLogin ? 'Login Now' : 'Register Now'}
+            </button>
+          </form>
 
-          <button type="submit" disabled={loading} className="auth-submit-btn">
-            {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Register'}
-          </button>
-        </form>
-
-        <div className="auth-toggle-container">
-          <button 
-            onClick={() => { setIsLogin(!isLogin); setMessage({ text: '', isError: false }); }}
-            className="auth-toggle-btn"
-          >
-            {isLogin ? "Need an account? Register here" : 'Already have an account? Log in'}
-          </button>
+      
         </div>
       </div>
     </div>
