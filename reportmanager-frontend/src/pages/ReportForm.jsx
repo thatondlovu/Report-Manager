@@ -77,7 +77,6 @@ const ReportForm = ({ user }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const reportId = id;
-
   const [formData, setFormData] = useState({
     weekNumber: '',
     startDate: '',
@@ -197,6 +196,9 @@ const ReportForm = ({ user }) => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       scrollToFirstError(newErrors);
+      return;
+    }
+
       return;
     }
 
@@ -438,6 +440,9 @@ const ReportForm = ({ user }) => {
           </form>
         </div>
       </main>
+    </div>
+        </div>
+      </form>
     </div>
   );
 };

@@ -44,7 +44,7 @@ function App() {
           } 
         />
 
-        {/* Dashboard Protection*/}
+        {/* Dashboard Protection */}
         <Route 
           path="/dashboard" 
           element={
@@ -60,13 +60,13 @@ function App() {
           }
         />
 
-        {/*Create Report Protection*/}
+        {/* Create Report Protection */}
         <Route 
           path="/reports/new" 
           element={currentUser ? <ReportForm user={currentUser} /> : <Navigate to="/login" replace />} 
         />
 
-        {/*Edit Report Protection*/}
+        {/* Edit Report Protection */}
         <Route 
           path="/reports/edit/:id" 
           element={currentUser ? <ReportForm user={currentUser} /> : <Navigate to="/login" replace />} 

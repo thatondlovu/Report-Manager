@@ -320,34 +320,9 @@ body, html {
   border: 1px solid #fecaca;
 }
 
-.alert-msg.success {
-  background-color: var(--gray-50);
-  color: var(--gray-800);
-  border: 1px solid var(--gray-300);
+.btn-draft:disabled,
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-
-.inline-error {
-  font-size: 0.775rem;
-  color: #dc2626;
-  margin-top: 0.25rem;
-  font-weight: 500;
-}
-
-.input-error {
-  border-color: #f87171 !important;
-  background-color: #fff5f5 !important;
-}
-
-/* collapse thingie */
-@media (max-width: 768px) {
-  .report-page-container {
-    flex-direction: column;
-  }
-  .report-sidebar {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .report-main-content {
-    padding: 1.5rem;
-  }
 }

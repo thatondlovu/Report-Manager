@@ -158,7 +158,7 @@ body, html {
   color: var(--gray-400);
 }
 
-.auth-input-styled:focus {
+.auth-input:focus {
   background-color: #ffffff;
   border-color: var(--gray-700);
   box-shadow: 0 0 0 3px rgba(51, 65, 85, 0.12);
@@ -182,6 +182,7 @@ body, html {
 .toggle-pwd-icon:hover {
   color: var(--gray-900);
 }
+
 
 .btn-primary-dark {
   width: 100%;
@@ -212,7 +213,7 @@ body, html {
   cursor: not-allowed;
 }
 
-.forgot-password-container {
+.auth-toggle-container {
   margin-top: 1.5rem;
   text-align: center;
   font-size: 0.85rem;
@@ -226,9 +227,9 @@ body, html {
   cursor: pointer;
 }
 
-.auth-alert-box {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+.auth-alert {
+  padding: 0.75rem 0.875rem;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
   margin-bottom: 1.25rem;

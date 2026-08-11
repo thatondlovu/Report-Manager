@@ -105,7 +105,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
   }, [user]);
 
   const [profileMsg, setProfileMsg] = useState('');
-
   const fetchReports = async () => {
     try {
       const data = await reportService.getReportsByUser(user.id);
@@ -376,6 +375,9 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         </div>
 
         <nav className="sidebar-nav">
+        </div>
+
+        <nav className="sidebar-nav">
           <button className="sidebar-btn active">My Reports</button>
           <button onClick={handleLogoutClick} className="sidebar-btn logout">
             Log Out
@@ -399,7 +401,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         ) : reports.length === 0 ? (
           <div className="empty-card">
             <h3>No reports submitted yet</h3>
-            <p>Click "+ Create Report" to log your first weekly entry.</p>
+            <p>Get started by creating your first weekly log entry.</p>
           </div>
         ) : (
           <div className="table-card">

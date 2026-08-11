@@ -1,3 +1,4 @@
+/* Color variables */
 :root {
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
@@ -24,7 +25,6 @@ body, html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
 }
-
 
 .dashboard-sidebar {
   width: 240px;
@@ -197,6 +197,7 @@ body, html {
   color: #ffffff;
 }
 
+/* Sidebar Navigation Buttons */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -301,7 +302,7 @@ body, html {
   background-color: var(--gray-900);
 }
 
-
+/* Empty State Styling */
 .empty-card {
   background-color: #ffffff;
   border: 1px dashed var(--gray-300);
@@ -321,6 +322,7 @@ body, html {
   margin: 0;
   font-size: 0.875rem;
 }
+
 
 .table-card {
   background-color: #ffffff;
@@ -367,6 +369,7 @@ body, html {
   color: var(--gray-900);
 }
 
+/* Dynamic Status Badges */
 .status-badge {
   display: inline-block;
   padding: 0.25rem 0.6rem;
@@ -388,6 +391,7 @@ body, html {
   border: 1px solid var(--gray-200);
 }
 
+/* Action Buttons inside Table */
 .action-group {
   display: flex;
   gap: 0.5rem;
