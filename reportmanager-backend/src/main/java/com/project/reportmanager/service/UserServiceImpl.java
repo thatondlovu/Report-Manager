@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse loginUser(LoginRequest request) {
-        // Allows login using username OR student number
+        // User can login using username OR student number
         User user = userRepository.findByUsername(request.username())
                 .or(() -> userRepository.findByStudentNumber(request.username()))
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username/student number or password"));
