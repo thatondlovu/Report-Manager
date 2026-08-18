@@ -89,15 +89,40 @@ const Auth = ({ onLoginSuccess }) => {
         const credentials = { username: formData.username, password: formData.password };
         const user = await userService.login(credentials);
         setMessage({ text: 'Login successful!', isError: false });
-        onLoginSuccess(user);
+        if (onLoginSuccess) {
+          onLoginSuccess(user);
+        }
         navigate('/dashboard');
       } else {
-        await userService.register(formData);
+        await userService.register({
+          username: formData.username,
+          studentNumber: formData.studentNumber,
+          department: formData.department.toUpperCase().trim(),
+          password: formData.password,
+        });
         setMessage({ text: 'Registration successful! You can now log in.', isError: false });
         setIsLogin(true);
       }
     } catch (error) {
-      setMessage({ text: error.response?.data || 'Error in the backend.', isError: true });
+      let errorText = 'An error occurred. Please try again.';
+
+      if (error.response?.data) {
+        const data = error.response.data;
+
+        if (typeof data === 'string') {
+          errorText = data;
+        } else if (data.validationErrors && Object.keys(data.validationErrors).length > 0) {
+          errorText = Object.values(data.validationErrors).join(', ');
+        } else if (data.message) {
+          errorText = data.message;
+        } else if (data.error) {
+          errorText = data.error;
+        }
+      } else if (error.message) {
+        errorText = error.message;
+      }
+
+      setMessage({ text: errorText, isError: true });
     } finally {
       setLoading(false);
     }
@@ -109,7 +134,6 @@ const Auth = ({ onLoginSuccess }) => {
       <div className="auth-hero-panel">
         <div className="hero-body">
           <h1 className="hero-title">
-            
             {isLogin ? 'Stay On Track!' : 'Start Your Journey!'}
           </h1>
           <p className="hero-description">
@@ -163,7 +187,7 @@ const Auth = ({ onLoginSuccess }) => {
             <input 
               type="text" 
               name="username" 
-              placeholder="Username"
+              placeholder="Username Or Student Number" 
               required 
               value={formData.username} 
               onChange={handleChange}
@@ -175,22 +199,28 @@ const Auth = ({ onLoginSuccess }) => {
                 <input 
                   type="text" 
                   name="studentNumber" 
-                  placeholder="Student Number"
+                  placeholder="Student Number" 
                   required 
                   value={formData.studentNumber} 
                   onChange={handleChange}
                   className="auth-input-styled"
                 />
 
-                <input 
-                  type="text" 
-                  name="department" 
-                  placeholder="Department"
-                  required 
-                  value={formData.department} 
-                  onChange={handleChange}
-                  className="auth-input-styled"
-                />
+                {}
+                  <select
+                    name="department"
+                    required
+                    value={formData.department}
+                    onChange={handleChange}
+                    className="auth-input-styled"
+                  >
+                    <option value="" disabled>Select Department</option>
+                    <option value="MULTIMEDIA_COMPUTING">Multimedia Computing</option>
+                    <option value="COMPUTER_SYSTEMS_ENGINEERING">Computer Systems Engineering</option>
+                    <option value="INFORMATICS">Informatics</option>
+                    <option value="INFORMATION_TECHNOLOGY">Information Technology</option>
+                    <option value="COMPUTER_SCIENCE">Computer Science</option>
+                  </select>
               </>
             )}
 
@@ -198,7 +228,7 @@ const Auth = ({ onLoginSuccess }) => {
               <input 
                 type={showPassword ? 'text' : 'password'} 
                 name="password" 
-                placeholder="Password"
+                placeholder="Password" 
                 required 
                 value={formData.password} 
                 onChange={handleChange}
@@ -207,7 +237,7 @@ const Auth = ({ onLoginSuccess }) => {
               />
               <button 
                 type="button" 
-                className="toggle-pwd-icon"
+                className="toggle-pwd-icon" 
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
@@ -220,16 +250,16 @@ const Auth = ({ onLoginSuccess }) => {
                 <input 
                   type={showConfirmPassword ? 'text' : 'password'} 
                   name="confirmPassword" 
-                  placeholder="Confirm Password"
+                  placeholder="Confirm Password" 
                   required 
-                  value={formData.confirmPassword}
+                  value={formData.confirmPassword} 
                   onChange={handleChange}
                   className="auth-input-styled"
                   style={{ paddingRight: '2.5rem' }}
                 />
                 <button 
                   type="button" 
-                  className="toggle-pwd-icon"
+                  className="toggle-pwd-icon" 
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
@@ -243,7 +273,6 @@ const Auth = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-      
         </div>
       </div>
     </div>

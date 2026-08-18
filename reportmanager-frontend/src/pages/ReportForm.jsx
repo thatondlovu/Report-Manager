@@ -3,6 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { reportService } from '../services/api';
 import './ReportForm.css';
 
+const DEPARTMENT_NAMES = {
+  MULTIMEDIA_COMPUTING: 'Multimedia Computing',
+  COMPUTER_SYSTEMS_ENGINEERING: 'Computer Systems Engineering',
+  INFORMATICS: 'Informatics',
+  INFORMATION_TECHNOLOGY: 'Information Technology',
+  COMPUTER_SCIENCE: 'Computer Science',
+};
+
+const formatDepartment = (dept) => DEPARTMENT_NAMES[dept] || dept || '';
+
 const isDayInRange = (dayName, startDateStr, endDateStr) => {
   if (!startDateStr || !endDateStr) return false;
 
@@ -202,32 +212,36 @@ const ReportForm = ({ user }) => {
     setLoading(true);
 
     try {
-      const existingReports = await reportService.getReportsByUser(user.id);
+      if (user?.id) {
+        const existingReports = await reportService.getReportsByUser(user.id);
 
-      const duplicateWeekReport = existingReports.find((rep) => {
-        const isDifferentReport = reportId ? String(rep.id) !== String(reportId) : true;
-        return isDifferentReport && Number(rep.weekNumber) === currentWeekNum;
-      });
+        if (Array.isArray(existingReports)) {
+          const duplicateWeekReport = existingReports.find((rep) => {
+            const isDifferentReport = reportId ? String(rep.id) !== String(reportId) : true;
+            return isDifferentReport && Number(rep.weekNumber) === currentWeekNum;
+          });
 
-      if (duplicateWeekReport) {
-        newErrors.weekNumber = `Week ${currentWeekNum} has already been recorded. Please select a different week.`;
-      }
+          if (duplicateWeekReport) {
+            newErrors.weekNumber = `Week ${currentWeekNum} has already been recorded. Please select a different week.`;
+          }
 
-      const duplicateRangeReport = existingReports.find((rep) => {
-        const isDifferentReport = reportId ? String(rep.id) !== String(reportId) : true;
-        if (!isDifferentReport) return false;
+          const duplicateRangeReport = existingReports.find((rep) => {
+            const isDifferentReport = reportId ? String(rep.id) !== String(reportId) : true;
+            if (!isDifferentReport) return false;
 
-        return isDateRangeOverlapping(
-          formData.startDate,
-          formData.endDate,
-          rep.startDate,
-          rep.endDate
-        );
-      });
+            return isDateRangeOverlapping(
+              formData.startDate,
+              formData.endDate,
+              rep.startDate,
+              rep.endDate
+            );
+          });
 
-      if (duplicateRangeReport) {
-        newErrors.startDate = `You have already filled in a report for the selected date/(s).`;
-        newErrors.endDate = 'Please choose a date range outside existing reports.';
+          if (duplicateRangeReport) {
+            newErrors.startDate = `You have already filled in a report for the selected date/(s).`;
+            newErrors.endDate = 'Please choose a date range outside existing reports.';
+          }
+        }
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -264,15 +278,20 @@ const ReportForm = ({ user }) => {
         }
       });
 
-      const payload = { 
-        ...cleanedFormData, 
-        status: statusType, 
-        user: { id: user.id } 
+      const payload = {
+        id: reportId || null,
+        weekNumber: currentWeekNum,
+        startDate: cleanedFormData.startDate,
+        endDate: cleanedFormData.endDate,
+        mondayText: cleanedFormData.mondayText || '',
+        tuesdayText: cleanedFormData.tuesdayText || '',
+        wednesdayText: cleanedFormData.wednesdayText || '',
+        thursdayText: cleanedFormData.thursdayText || '',
+        fridayText: cleanedFormData.fridayText || '',
+        challenges: cleanedFormData.challenges || '',
+        status: statusType,
+        userId: user?.id,
       };
-
-      if (reportId) {
-        payload.id = reportId;
-      }
 
       await reportService.saveReport(payload);
 
@@ -288,7 +307,12 @@ const ReportForm = ({ user }) => {
         });
       }, 800);
     } catch (err) {
-      setMsg('Save failed. Please try again.');
+      const errorMsg =
+        err.response?.data?.message ||
+        (err.response?.data?.validationErrors && Object.values(err.response.data.validationErrors).join(', ')) ||
+        err.response?.data?.error ||
+        'Save failed. Please check your inputs and try again.';
+      setMsg(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -303,7 +327,7 @@ const ReportForm = ({ user }) => {
           </div>
           <h3 className="profile-name">{user?.username}</h3>
           <p className="profile-meta">{user?.studentNumber}</p>
-          <p className="profile-dept">{user?.department}</p>
+          <p className="profile-dept">{formatDepartment(user?.department)}</p>
         </div>
 
         <nav className="sidebar-nav">
@@ -321,12 +345,11 @@ const ReportForm = ({ user }) => {
         <header className="report-header">
           <div>
             <h1 className="page-title">{reportId ? 'Edit Weekly Report' : 'Create Weekly Report'}</h1>
-            <p className="page-subtitle">Fill in your weekly activity details and challenges faced.</p>
           </div>
         </header>
 
         {msg && (
-          <div className={`alert-msg ${msg.toLowerCase().includes('successfully') ? 'success' : 'error'}`}>
+          <div className={`alert-msg ${msg.toLowerCase().includes('success') ? 'success' : 'error'}`}>
             {msg}
           </div>
         )}

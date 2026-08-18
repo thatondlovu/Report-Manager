@@ -72,7 +72,7 @@ function App() {
           element={currentUser ? <ReportForm user={currentUser} /> : <Navigate to="/login" replace />} 
         />
 
-        {/* Catch-All Fallback Route for Invalid URLs */}
+        {/* Catch All Fallback Route for incorrect URLs */}
         <Route 
           path="*" 
           element={<Navigate to={currentUser ? "/dashboard" : "/login"} replace />} 

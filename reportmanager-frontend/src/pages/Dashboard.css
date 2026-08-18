@@ -1,4 +1,3 @@
-/* Color variables */
 :root {
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
@@ -12,22 +11,28 @@
   --gray-900: #0f172a;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body, html {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
 }
 
 .dashboard-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
   background-color: var(--gray-100);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
 }
 
 .dashboard-sidebar {
-  width: 240px;
+  width: 260px;
   background-color: var(--gray-900);
   color: #ffffff;
   padding: 2rem 1.25rem;
@@ -63,6 +68,7 @@ body, html {
   font-size: 1.05rem;
   font-weight: 700;
   color: #ffffff;
+  word-break: break-word;
 }
 
 .profile-meta {
@@ -97,8 +103,8 @@ body, html {
 
 .field-input {
   width: 100%;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.8125rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.875rem;
   color: #ffffff;
   background-color: var(--gray-800);
   border: 1px solid var(--gray-700);
@@ -126,19 +132,20 @@ body, html {
 }
 
 .password-input-group .field-input {
-  padding-right: 2.25rem;
+  padding-right: 2.5rem;
 }
 
 .password-toggle-btn {
   position: absolute;
-  right: 0.5rem;
+  right: 0.65rem;
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   color: var(--gray-400);
-  padding: 0;
+  padding: 0.25rem;
   transition: color 0.15s ease;
 }
 
@@ -152,7 +159,7 @@ body, html {
   color: #f87171;
   background-color: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 4px;
   line-height: 1.3;
 }
@@ -165,7 +172,7 @@ body, html {
 
 .btn-save-profile {
   flex: 1;
-  padding: 0.5rem;
+  padding: 0.55rem;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--gray-900);
@@ -181,7 +188,7 @@ body, html {
 }
 
 .btn-cancel-profile {
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--gray-300);
@@ -197,7 +204,6 @@ body, html {
   color: #ffffff;
 }
 
-/* Sidebar Navigation Buttons */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -258,26 +264,29 @@ body, html {
   border-color: rgba(239, 68, 68, 0.2);
 }
 
-
 .dashboard-main {
   flex: 1;
   padding: 2.5rem;
-  box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 2rem;
+  gap: 1.5rem;
 }
 
 .page-title {
   margin: 0 0 0.35rem 0;
-  font-size: 1.5rem;
+  font-size: 2.25rem;
   font-weight: 700;
   color: var(--gray-900);
   letter-spacing: -0.02em;
+  line-height: 1.15;
+  
 }
 
 .page-subtitle {
@@ -287,7 +296,7 @@ body, html {
 }
 
 .primary-btn {
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
@@ -295,6 +304,7 @@ body, html {
   border: 1px solid var(--gray-900);
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
@@ -302,12 +312,11 @@ body, html {
   background-color: var(--gray-900);
 }
 
-/* Empty State Styling */
 .empty-card {
   background-color: #ffffff;
   border: 1px dashed var(--gray-300);
   border-radius: 12px;
-  padding: 3.5rem 2rem;
+  padding: 3.5rem 1.5rem;
   text-align: center;
   color: var(--gray-500);
 }
@@ -323,17 +332,19 @@ body, html {
   font-size: 0.875rem;
 }
 
-
 .table-card {
   background-color: #ffffff;
   border: 1px solid var(--gray-200);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 .reports-table {
   width: 100%;
+  min-width: 580px;
   border-collapse: collapse;
   text-align: left;
 }
@@ -367,9 +378,9 @@ body, html {
 .week-cell {
   font-weight: 600;
   color: var(--gray-900);
+  white-space: nowrap;
 }
 
-/* Dynamic Status Badges */
 .status-badge {
   display: inline-block;
   padding: 0.25rem 0.6rem;
@@ -377,6 +388,7 @@ body, html {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .status-badge.submitted {
@@ -391,14 +403,14 @@ body, html {
   border: 1px solid var(--gray-200);
 }
 
-/* Action Buttons inside Table */
 .action-group {
   display: flex;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .action-btn {
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
   border-radius: 4px;
@@ -426,4 +438,137 @@ body, html {
 .action-btn.delete:hover {
   background-color: #fef2f2;
   border-color: #fecaca;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: row;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  .dashboard-sidebar {
+    width: 130px;
+    min-width: 130px;
+    padding: 1rem 0.6rem;
+    gap: 0.85rem;
+    border-right: 1px solid var(--gray-800);
+    border-bottom: none;
+  }
+
+  .profile-card {
+    padding-bottom: 0.85rem;
+  }
+
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+  }
+
+  .profile-name {
+    font-size: 0.8rem;
+    line-height: 1.1;
+    word-break: break-all;
+  }
+
+  .profile-meta {
+    font-size: 0.68rem;
+    margin-top: 0.15rem;
+    word-break: break-all;
+  }
+
+  .profile-dept {
+    font-size: 0.68rem;
+    line-height: 1.15;
+    margin-top: 0.2rem;
+  }
+
+  .action-edit-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
+    margin-top: 0.5rem !important;
+  }
+
+  .sidebar-btn {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .field-input {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .profile-section-divider {
+    font-size: 0.6rem;
+  }
+
+  .btn-save-profile,
+  .btn-cancel-profile {
+    padding: 0.4rem 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .dashboard-main {
+    flex: 1;
+    padding: 1rem 0.75rem;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+    text-align: left;
+    margin-bottom: 0.15rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .primary-btn {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .table-card {
+    border-radius: 8px;
+  }
+
+  .reports-table {
+    min-width: 480px;
+  }
+
+  .reports-table th {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.68rem;
+  }
+
+  .reports-table td {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.78rem;
+  }
+
+  .action-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .status-badge {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.68rem;
+  }
 }

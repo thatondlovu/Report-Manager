@@ -3,6 +3,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { reportService, userService } from '../services/api';
 import './Dashboard.css';
 
+const DEPARTMENT_NAMES = {
+  MULTIMEDIA_COMPUTING: 'Multimedia Computing',
+  COMPUTER_SYSTEMS_ENGINEERING: 'Computer Systems Engineering',
+  INFORMATICS: 'Informatics',
+  INFORMATION_TECHNOLOGY: 'Information Technology',
+  COMPUTER_SCIENCE: 'Computer Science',
+};
+
+const formatDepartment = (dept) => DEPARTMENT_NAMES[dept] || dept || '';
+
 const validatePasswordStrength = (password) => {
   if (password.length < 8) {
     return 'New password must be at least 8 characters long.';
@@ -53,7 +63,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Toast state
+
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const showToast = (message, type = 'success') => {
@@ -74,7 +84,6 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
     onLogout();
     navigate('/login');
   };
-
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -131,7 +140,8 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
     if (window.confirm('Are you sure you want to delete this report?')) {
       try {
         const API_BASE_URL = 'http://localhost:8090/api';
-        await fetch(`${API_BASE_URL}/reports/${id}`, { method: 'DELETE' });
+
+        await reportService.deleteReport(id, user.id);
         setReports(reports.filter((report) => report.id !== id));
         
         showToast('Report deleted successfully.', 'success');
@@ -223,7 +233,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
       {toast.show && (
         <div style={{
           position: 'fixed',
-          top: '20px',
+          bottom: '20px',
           right: '20px',
           backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
           color: '#ffffff',
@@ -249,7 +259,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
             <>
               <h3 className="profile-name">{user?.username}</h3>
               <p className="profile-meta">{user?.studentNumber}</p>
-              <p className="profile-dept">{user?.department}</p>
+              <p className="profile-dept">{formatDepartment(user?.department)}</p>
               <button 
                 onClick={() => setIsEditingProfile(true)}
                 className="action-edit-btn"
@@ -281,15 +291,20 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
                 className="field-input"
                 required
               />
-              <input
-                type="text"
+              <select
                 name="department"
                 value={profileData.department}
                 onChange={handleProfileChange}
-                placeholder="Department"
                 className="field-input"
                 required
-              />
+              >
+                <option value="" disabled>Select Department</option>
+                <option value="MULTIMEDIA_COMPUTING">Multimedia Computing</option>
+                <option value="COMPUTER_SYSTEMS_ENGINEERING">Computer Systems Engineering</option>
+                <option value="INFORMATICS">Informatics</option>
+                <option value="INFORMATION_TECHNOLOGY">Information Technology</option>
+                <option value="COMPUTER_SCIENCE">Computer Science</option>
+              </select>
 
               <div className="profile-section-divider">Change Password</div>
 
@@ -384,7 +399,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         <header className="dashboard-header">
           <div>
             <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">Manage and track your weekly report submissions.</p>
+            
           </div>
           <button onClick={() => navigate('/reports/new')} className="primary-btn">
             + Create Report
@@ -396,7 +411,7 @@ const Dashboard = ({ user, onLogout, onUserUpdate }) => {
         ) : reports.length === 0 ? (
           <div className="empty-card">
             <h3>No reports submitted yet</h3>
-            <p>Click "+ Create Report" to log your first weekly entry.</p>
+            <p>Click "+ Create Report" to log your first weekly report.</p>
           </div>
         ) : (
           <div className="table-card">
