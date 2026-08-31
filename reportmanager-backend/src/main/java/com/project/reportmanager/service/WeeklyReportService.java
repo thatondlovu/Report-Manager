@@ -1,37 +1,17 @@
 package com.project.reportmanager.service;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.project.reportmanager.dto.DashboardStatsResponse;
+import com.project.reportmanager.dto.WeeklyReportRequest;
+import com.project.reportmanager.dto.WeeklyReportResponse;
 
-import com.project.reportmanager.model.WeeklyReport;
-import com.project.reportmanager.repository.WeeklyReportRepository;
-
-@Service
-public class WeeklyReportService {
-
-    @Autowired
-    private WeeklyReportRepository weeklyReportRepository;
-
-    // Save or update a weekly report
-    public WeeklyReport saveReport(WeeklyReport report) {
-        return weeklyReportRepository.save(report);
-    }
-
-    // Get all reports created by a specific user
-    public List<WeeklyReport> getReportsByUser(Long userId) {
-        return weeklyReportRepository.findByUserId(userId);
-    }
-
-    // Get a specific report by its ID
-    public WeeklyReport getReportById(Long id) {
-        return weeklyReportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Report not found with ID: " + id));
-    }
-
-    // Delete a report
-    public void deleteReport(Long id) {
-        weeklyReportRepository.deleteById(id);
-    }
+public interface WeeklyReportService {
+    WeeklyReportResponse saveOrUpdateReport(WeeklyReportRequest request);
+    List<WeeklyReportResponse> getReportsByUserId(UUID userId);
+    WeeklyReportResponse getReportById(UUID reportId);
+    void deleteReport(UUID reportId, UUID requestingUserId);
+    DashboardStatsResponse getDashboardStats(UUID userId);
+}
 }

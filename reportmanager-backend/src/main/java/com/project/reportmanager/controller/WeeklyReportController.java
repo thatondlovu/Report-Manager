@@ -1,59 +1,61 @@
 package com.project.reportmanager.controller;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.reportmanager.model.WeeklyReport;
+import com.project.reportmanager.dto.DashboardStatsResponse;
+import com.project.reportmanager.dto.WeeklyReportRequest;
+import com.project.reportmanager.dto.WeeklyReportResponse;
 import com.project.reportmanager.service.WeeklyReportService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/reports")
 @CrossOrigin(origins = "*") // Allows React to make API requests safely
+@RequiredArgsConstructor
 public class WeeklyReportController {
 
-    @Autowired
-    private WeeklyReportService weeklyReportService;
+    private final WeeklyReportService weeklyReportService;
 
     // Create or Update a report
     @PostMapping
-    public ResponseEntity<WeeklyReport> createOrUpdateReport(@RequestBody WeeklyReport report) {
-        return ResponseEntity.ok(weeklyReportService.saveReport(report));
+    public ResponseEntity<WeeklyReportResponse> saveOrUpdateReport(@Valid @RequestBody WeeklyReportRequest request) {
+        return new ResponseEntity<>(weeklyReportService.saveOrUpdateReport(request), HttpStatus.OK);
     }
 
     // Get all reports for a specific student/user
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<WeeklyReport>> getReportsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(weeklyReportService.getReportsByUser(userId));
+    public ResponseEntity<List<WeeklyReportResponse>> getReportsByUser(@PathVariable UUID userId) {
+        return ResponseEntity.ok(weeklyReportService.getReportsByUserId(userId));
     }
 
-    
     @GetMapping("/{id}")
-    public ResponseEntity<WeeklyReport> getReportById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(weeklyReportService.getReportById(id));
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<WeeklyReportResponse> getReportById(@PathVariable UUID id) {
+        return ResponseEntity.ok(weeklyReportService.getReportById(id));
+    }
+    @GetMapping("/user/{userId}/stats")
+    public ResponseEntity<DashboardStatsResponse> getDashboardStats(@PathVariable UUID userId) {
+    return ResponseEntity.ok(weeklyReportService.getDashboardStats(userId));
     }
 
-    
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReport(@PathVariable Long id) {
-        try {
-            weeklyReportService.deleteReport(id);
-            return ResponseEntity.ok("Report deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteReport(
+            @PathVariable UUID id,
+            @RequestParam UUID userId) {
+        weeklyReportService.deleteReport(id, userId);
+        return ResponseEntity.noContent().build();
     }
 }
