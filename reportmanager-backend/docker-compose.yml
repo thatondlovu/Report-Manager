@@ -7,9 +7,14 @@
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: reportshub
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   reports-api:
     build: .
@@ -18,14 +23,17 @@
     ports:
       - "8090:8090"
     depends_on:
-      - mysqldb
+      mysqldb:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/reportshub?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/reportshub?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: rootpassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 8090
 
   reports-frontend:
-    build: C:\ReportsManager\Report-Manager\reportmanager-frontend
+    build: C:/ReportsManager/Report-Manager/reportmanager-frontend
     container_name: reports-frontend
     restart: always
     ports:

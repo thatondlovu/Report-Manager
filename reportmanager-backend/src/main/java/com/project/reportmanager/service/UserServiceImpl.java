@@ -1,5 +1,11 @@
 package com.project.reportmanager.service;
 
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.project.reportmanager.dto.LoginRequest;
 import com.project.reportmanager.dto.RegisterUserRequest;
 import com.project.reportmanager.dto.UpdateUserRequest;
@@ -9,12 +15,8 @@ import com.project.reportmanager.exception.ResourceNotFoundException;
 import com.project.reportmanager.exception.UserAlreadyExistsException;
 import com.project.reportmanager.model.User;
 import com.project.reportmanager.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setGender(request.gender());
         user.setUsername(request.username());
         user.setStudentNumber(request.studentNumber());
         user.setDepartment(request.department());
@@ -47,7 +52,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse loginUser(LoginRequest request) {
-        // User can login using username OR student number
         User user = userRepository.findByUsername(request.username())
                 .or(() -> userRepository.findByStudentNumber(request.username()))
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username/student number or password"));
@@ -72,6 +76,18 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(UUID id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+
+        if (request.firstName() != null && !request.firstName().isBlank()) {
+            user.setFirstName(request.firstName());
+        }
+
+        if (request.lastName() != null && !request.lastName().isBlank()) {
+            user.setLastName(request.lastName());
+        }
+
+        if (request.gender() != null && !request.gender().isBlank()) {
+            user.setGender(request.gender());
+        }
 
         if (request.username() != null && !request.username().isBlank()) {
             if (!user.getUsername().equals(request.username()) && userRepository.existsByUsername(request.username())) {
@@ -105,6 +121,9 @@ public class UserServiceImpl implements UserService {
     private UserResponse mapToResponse(User user) {
         return new UserResponse(
                 user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getGender(),
                 user.getUsername(),
                 user.getStudentNumber(),
                 user.getDepartment()

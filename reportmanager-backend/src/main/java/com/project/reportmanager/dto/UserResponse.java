@@ -1,11 +1,14 @@
 package com.project.reportmanager.dto;
 
-import com.project.reportmanager.enums.Department;
-
 import java.util.UUID;
+
+import com.project.reportmanager.enums.Department;
 
 public record UserResponse(
     UUID id,
+    String firstName,
+    String lastName,
+    String gender,
     String username,
     String studentNumber,
     Department department
